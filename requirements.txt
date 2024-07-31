@@ -1,0 +1,4 @@
+Flask==2.0.3
+google-generativeai==0.1.0  # Replace with the actual version you are using
+gunicorn==20.1.0
+werkzeug==2.0

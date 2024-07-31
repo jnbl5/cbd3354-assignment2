@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Generator</title>
+    <script>
+        async function submitPrompt() {
+            const prompt = document.getElementById('prompt').value;
+            
+            // Show loading message
+            document.getElementById('response').textContent = 'Generating...';
+            
+            try {
+                const response = await fetch('/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: prompt }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                document.getElementById('response').textContent = data.response || 'No response from server';
+            } catch (error) {
+                document.getElementById('response').textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Text Generator</h1>
+    <form onsubmit="event.preventDefault(); submitPrompt();">
+        <label for="prompt">Enter prompt:</label>
+        <textarea id="prompt" rows="4" cols="50"></textarea>
+        <br>
+        <button type="submit">Generate</button>
+    </form>
+    <h2>Generated Response:</h2>
+    <pre id="response"></pre>
+</body>
+</html>
