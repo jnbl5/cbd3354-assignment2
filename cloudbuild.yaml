@@ -1,7 +1,7 @@
 steps:
   # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: 
+    args:
       - 'build'
       - '-t'
       - 'gcr.io/cbd3354-systems/flask-app:$COMMIT_SHA'
@@ -9,13 +9,23 @@ steps:
 
   # Step 2: Push the Docker image to Google Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args: 
+    args:
       - 'push'
       - 'gcr.io/cbd3354-systems/flask-app:$COMMIT_SHA'
 
-  # Step 3: Deploy the new image to GKE
+  # Step 3: Apply the deployment (create or update)
   - name: 'gcr.io/cloud-builders/kubectl'
-    args: 
+    args:
+      - 'apply'
+      - '-f'
+      - 'deployment.yaml'
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=geminiai-cluster'
+
+  # Step 4: Update the image in the deployment
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
       - 'set'
       - 'image'
       - 'deployment/flask-app'
@@ -27,3 +37,6 @@ steps:
 
 images:
   - 'gcr.io/cbd3354-systems/flask-app:$COMMIT_SHA'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
