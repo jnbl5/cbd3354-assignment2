@@ -1,7 +1,7 @@
 steps:
   # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args:
+    args: 
       - 'build'
       - '-t'
       - 'gcr.io/cbd3354-systems/flask-app:$COMMIT_SHA'
@@ -9,30 +9,13 @@ steps:
 
   # Step 2: Push the Docker image to Google Container Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args:
+    args: 
       - 'push'
       - 'gcr.io/cbd3354-systems/flask-app:$COMMIT_SHA'
 
-  # Step 3: Apply the deployment (create or update) from the kubernetes folder
+  # Step 3: Deploy the new image to GKE
   - name: 'gcr.io/cloud-builders/kubectl'
-    args:
-      - 'apply'
-      - '-f'
-      - 'kubernetes/deployment.yaml'
-    env:
-      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
-      - 'CLOUDSDK_CONTAINER_CLUSTER=geminiai-cluster'
-    # Enable debugging output
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "Applying kubernetes/deployment.yaml"
-        kubectl apply -f kubernetes/deployment.yaml
-
-  # Step 4: Update the image in the deployment
-  - name: 'gcr.io/cloud-builders/kubectl'
-    args:
+    args: 
       - 'set'
       - 'image'
       - 'deployment/flask-app'
@@ -41,16 +24,6 @@ steps:
     env:
       - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'
       - 'CLOUDSDK_CONTAINER_CLUSTER=geminiai-cluster'
-    # Enable debugging output
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "Updating image for flask-app"
-        kubectl set image deployment/flask-app flask-app=gcr.io/cbd3354-systems/flask-app:$COMMIT_SHA --namespace=default
 
 images:
   - 'gcr.io/cbd3354-systems/flask-app:$COMMIT_SHA'
-
-options:
-  logging: CLOUD_LOGGING_ONLY
